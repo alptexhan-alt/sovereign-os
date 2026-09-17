@@ -28,14 +28,21 @@ jobs:
         uses: sigstore/cosign-installer@v3.5.0
 
       - name: Generate Cosign Key Pair
+        id: keys
         run: |
           cosign generate-key-pair
+          echo "priv<<EOF" >> $GITHUB_OUTPUT
+          cat cosign.key >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
         env:
           COSIGN_PASSWORD: ""
 
       - name: Build Custom OS Image
         uses: blue-build/github-action@v1.8
+        env:
+          COSIGN_PRIVATE_KEY: ${{ steps.keys.outputs.priv }}
         with:
           recipe: ${{ matrix.recipe }}
+          cosign_private_key: ${{ steps.keys.outputs.priv }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
