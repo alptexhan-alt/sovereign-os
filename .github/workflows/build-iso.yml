@@ -1,0 +1,32 @@
+name: Generate Bootable ISO
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Derlenecek imaj etiketi'
+        default: 'latest'
+        required: true
+
+jobs:
+  build-iso:
+    name: Generate Sovereign OS ISO
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build ISO using blue-build
+        uses: blue-build/iso-action@v1
+        with:
+          image_name: sovereign-os
+          image_tag: ${{ github.event.inputs.image_tag }}
+          installer_version: latest
+
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sovereign-os-bootable-iso
+          path: output/*.iso

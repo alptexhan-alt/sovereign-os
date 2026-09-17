@@ -1,0 +1,14 @@
+[Unit]
+Description=Sovereign OS Wi-Fi Sentinel Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/sovereign-os/modules/wifi_radar
+ExecStart=/usr/bin/python3 /opt/sovereign-os/modules/wifi_radar/radar.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

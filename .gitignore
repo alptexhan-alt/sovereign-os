@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.log
+radar_devices.json
+active_spoof_profile.json

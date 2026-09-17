@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sovereign OS // Kontrol Merkezi & Masaüstü Kabuğu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080b11;
+      --bg-panel: rgba(16, 23, 38, 0.75);
+      --border-panel: rgba(56, 189, 248, 0.2);
+      --cyan: #00f2fe;
+      --cyan-glow: rgba(0, 242, 254, 0.35);
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.3);
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 10%, #0f1c30, var(--bg-dark));
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Üst Sistem Çubuğu (Top Bar) */
+    .top-bar {
+      height: 54px;
+      background: rgba(10, 15, 26, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      font-size: 1.1rem;
+      color: var(--cyan);
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--green);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .system-stats {
+      display: flex;
+      gap: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+    }
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .stat-val { color: var(--cyan); font-weight: 600; }
+
+    /* Ana Düzen */
+    .container {
+      max-width: 1380px;
+      margin: 28px auto;
+      padding: 0 24px;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Modül Sekmeleri */
+    .nav-tabs {
+      display: flex;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border-panel);
+      width: fit-content;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 22px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+    .tab-btn.active {
+      background: var(--cyan);
+      color: #04101e;
+      box-shadow: 0 0 16px var(--cyan-glow);
+    }
+
+    /* Kartlar & Paneller */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-panel);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Tab 1: Wi-Fi Sentinel Grid */
+    .radar-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+    }
+    .radar-visual {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 14px;
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      position: relative;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .radar-circle {
+      position: absolute;
+      border: 1px dashed rgba(0, 242, 254, 0.2);
+      border-radius: 50%;
+    }
+    .radar-circle:nth-child(1) { width: 80px; height: 80px; }
+    .radar-circle:nth-child(2) { width: 160px; height: 160px; }
+    .radar-circle:nth-child(3) { width: 240px; height: 240px; }
+    .radar-line {
+      position: absolute;
+      width: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan));
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      animation: rotate 4s linear infinite;
+    }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Cihaz Tablosu */
+    .device-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .device-table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: 'Fira Code', monospace;
+    }
+    .device-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-family: 'Fira Code', monospace;
+    }
+    .device-table tr:hover { background: rgba(255, 255, 255, 0.03); }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-active { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid var(--green); }
+    .status-self { background: rgba(0, 242, 254, 0.2); color: var(--cyan); border: 1px solid var(--cyan); }
+
+    /* Tab 2: HWID Karşılaştırma */
+    .hwid-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .hwid-card {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hwid-card.spoofed { border-color: var(--cyan); box-shadow: 0 0 20px rgba(0, 242, 254, 0.15); }
+    .hwid-card h3 { margin-bottom: 16px; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; }
+    .hwid-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.88rem;
+    }
+    .hwid-label { color: var(--text-muted); }
+    .hwid-val { font-family: 'Fira Code', monospace; font-weight: 600; }
+    .val-real { color: var(--yellow); }
+    .val-spoofed { color: var(--green); }
+
+    /* Butonlar */
+    .btn {
+      background: linear-gradient(135deg, var(--cyan), #0099ff);
+      color: #04101e;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 0 20px var(--cyan-glow); }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); box-shadow: none; }
+
+    /* Tab 3: ZSTD Sıkıştırma Simülatörü */
+    .compression-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 24px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .bar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bar-wrapper {
+      height: 38px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .bar-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 14px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: width 0.6s ease;
+    }
+    .bar-original { width: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b); }
+    .bar-compressed { width: 68%; background: linear-gradient(90deg, #10b981, var(--cyan)); }
+
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Üst Sistem Çubuğu -->
+  <header class="top-bar">
+    <div class="logo">
+      <div class="pulse-dot"></div>
+      SOVEREIGN OS <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">v1.0 Sentinel Core</span>
+    </div>
+    <div class="system-stats">
+      <div class="stat-badge">RAM: <span class="stat-val" id="stat-ram">480 MB / 16 GB (%3.1)</span></div>
+      <div class="stat-badge">HWID SHIELD: <span class="stat-val" style="color: var(--green);">KORUMADA</span></div>
+      <div class="stat-badge">AĞ: <span class="stat-val" id="stat-devices">7 Cihaz İzleniyor</span></div>
+      <div class="stat-badge">TELEMETRİ: <span class="stat-val" style="color: var(--cyan);">%0 (SIFIR)</span></div>
+    </div>
+  </header>
+
+  <!-- Ana İçerik -->
+  <main class="container">
+    
+    <!-- Modül Butonları -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('wifi')">
+        <span>📡</span> 1. Wi-Fi Ağ Radarı
+      </button>
+      <button class="tab-btn" onclick="switchTab('hwid')">
+        <span>🛡️</span> 2. Donanım Maskeleme (HWID)
+      </button>
+      <button class="tab-btn" onclick="switchTab('zstd')">
+        <span>⚡</span> 3. ZSTD Disk Sıkıştırma
+      </button>
+      <button class="tab-btn" onclick="switchTab('proton')">
+        <span>🎮</span> 4. Windows/Proton Uyumluluğu
+      </button>
+    </div>
+
+    <!-- SEKME 1: Wi-Fi AĞ RADARI -->
+    <div id="tab-wifi" class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>📡</span> Canlı Wi-Fi Cihaz Gözetleme Paneli
+        </div>
+        <button class="btn" onclick="rescanWifi()">
+          <span>🔄</span> Ağı Tekrar Tara
+        </button>
+      </div>
+
+      <div class="radar-grid">
+        <div class="radar-visual">
+          <div class="radar-circle"></div>
+          <div class="radar-circle"></div>
+          <div class="radar-circle"></div>
+          <div class="radar-line"></div>
+          <div style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--cyan); z-index: 10; text-align: center;">
+            SENTINEL ACTIVE<br>
+            <span id="radar-count" style="font-size: 1.4rem; font-weight: 800; color: #fff;">7</span> Cihaz
+          </div>
+        </div>
+
+        <div>
+          <table class="device-table">
+            <thead>
+              <tr>
+                <th>IP ADRESİ</th>
+                <th>MAC ADRESİ</th>
+                <th>ÜRETİCİ / MARKA</th>
+                <th>CİHAZ ADI</th>
+                <th>DURUM</th>
+              </tr>
+            </thead>
+            <tbody id="device-table-body">
+              <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKME 2: DONANIM MASKELEME -->
+    <div id="tab-hwid" class="panel hide">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>🛡️</span> Çekirdek Seviyesinde Donanım Maskeleme (Anti-HWID Ban)
+        </div>
+        <button class="btn" onclick="randomizeHwid()">
+          <span>🎲</span> Sahte Kimliği Değiştir (Randomize)
+        </button>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">
+        Oyunlar, anti-cheat sistemleri ve casus programlar donanımınızı sorguladığında, işletim sistemimiz gerçek kimlikleri gizler ve aşağıdaki sahte profili sunar.
+      </p>
+
+      <div class="hwid-grid">
+        <!-- Gerçek Donanım -->
+        <div class="hwid-card">
+          <h3>
+            <span>Gerçek Donanımınız</span>
+            <span style="font-size: 0.75rem; color: var(--yellow);">UYGULAMALARA KAPALI</span>
+          </h3>
+          <div class="hwid-row"><span class="hwid-label">Anakart Seri No</span><span class="hwid-val val-real" id="real-board">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">BIOS Seri No</span><span class="hwid-val val-real" id="real-bios">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">SSD Seri No</span><span class="hwid-val val-real" id="real-disk">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">Ağ Kartı (MAC)</span><span class="hwid-val val-real" id="real-mac">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">Sistem UUID</span><span class="hwid-val val-real" id="real-uuid">-</span></div>
+        </div>
+
+        <!-- Sahte / Maskelenmiş Donanım -->
+        <div class="hwid-card spoofed">
+          <h3>
+            <span style="color: var(--cyan);">Uygulamaların Gördüğü (Maskeli)</span>
+            <span style="font-size: 0.75rem; color: var(--green);">AKTİF MASKE</span>
+          </h3>
+          <div class="hwid-row"><span class="hwid-label">Anakart Modeli</span><span class="hwid-val val-spoofed" id="spoof-board-model">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">Anakart Seri No</span><span class="hwid-val val-spoofed" id="spoof-board">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">SSD Modeli / Seri</span><span class="hwid-val val-spoofed" id="spoof-disk">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">Sahte MAC</span><span class="hwid-val val-spoofed" id="spoof-mac">-</span></div>
+          <div class="hwid-row"><span class="hwid-label">Sahte UUID</span><span class="hwid-val val-spoofed" id="spoof-uuid">-</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKME 3: ZSTD SIKIŞTIRMA -->
+    <div id="tab-zstd" class="panel hide">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>⚡</span> Gerçek Zamanlı Şeffaf ZSTD Sıkıştırma (Btrfs Tabanlı)
+        </div>
+      </div>
+
+      <div class="compression-box">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Dosyalar diske yazılırken hiçbir bozulma olmadan sıkıştırılır. Oyun açılırken NVMe disk daha az fiziksel blok okuduğu için yükleme süreleri hızlanır.
+        </p>
+
+        <div class="bar-container">
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span>Standart Windows Diski (Sıkıştırmasız)</span>
+            <span style="color: var(--red); font-weight: 700;">50.0 GB</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-fill bar-original">50 GB Kaplanan Alan</div>
+          </div>
+        </div>
+
+        <div class="bar-container">
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span>Sovereign OS (ZSTD:3 Şeffaf Sıkıştırma)</span>
+            <span style="color: var(--green); font-weight: 700;">34.2 GB (%31.6 Tasarruf)</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-fill bar-compressed">34.2 GB Kaplanan Alan (Kazanılan: 15.8 GB)</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--green); border-radius: 8px; padding: 16px; margin-top: 10px;">
+          <h4 style="color: var(--green); margin-bottom: 6px;">✓ 500 GB Oyun Kütüphanesinde Ne Olur?</h4>
+          <p style="font-size: 0.9rem; color: #cbd5e1;">
+            500 GB'lık oyun arşivi kurduğunda diskinizden yaklaşık <strong>150 GB ile 180 GB arasında</strong> bedava yer açılır. Üstelik CPU yükü %1'in altındadır.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKME 4: PROTON / WINDOWS UYUMLULUĞU -->
+    <div id="tab-proton" class="panel hide">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>🎮</span> Windows Program & Oyun Uyumluluğu Motoru (Proton/DXVK)
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Sovereign OS çekirdeğinde yerleşik Windows API çeviricisi bulunur. Bir <code>.exe</code> veya DirectX oyununa çift tıkladığınızda:
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px;">
+          <div style="background: rgba(255,255,255,0.04); padding: 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">🚀</div>
+            <h4 style="color: #fff; margin-bottom: 6px;">DirectX 11/12 -> Vulkan</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">DXVK ve VKD3D ile oyunlar yerel ekran kartı sürücüsüne doğrudan Vulkan olarak yansıtılır.</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.04); padding: 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">⚡</div>
+            <h4 style="color: #fff; margin-bottom: 6px;">Sıfır Kurulum</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Ekstra emülatör veya ayar gerekmez; .exe dosyaları tıpkı Windows'taki gibi çift tıkla açılır.</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.04); padding: 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">🛡️</div>
+            <h4 style="color: #fff; margin-bottom: 6px;">Yalıtılmış Sandbox</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Her Windows uygulaması kendi güvenli kabarcığında çalışır, ana sisteme virüs bulaşamaz.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Sekme Geçişi
+    function switchTab(tabId) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.add('hide'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabId).classList.remove('hide');
+      event.currentTarget.classList.add('active');
+    }
+
+    // Wi-Fi Cihazlarını Getir
+    async function loadWifiData() {
+      try {
+        const res = await fetch('/api/radar');
+        const data = await res.json();
+        renderDevices(data.devices || []);
+      } catch (e) {
+        console.error("Radar yükleme hatası:", e);
+      }
+    }
+
+    function renderDevices(devices) {
+      const tbody = document.getElementById('device-table-body');
+      tbody.innerHTML = '';
+      document.getElementById('radar-count').innerText = devices.length;
+      document.getElementById('stat-devices').innerText = `${devices.length} Cihaz İzleniyor`;
+
+      devices.forEach(d => {
+        const tr = document.createElement('tr');
+        const isSelf = d.status === 'Ev Sahibi';
+        const badgeClass = isSelf ? 'status-self' : 'status-active';
+
+        tr.innerHTML = `
+          <td style="color: #fff; font-weight: 600;">${d.ip}</td>
+          <td style="color: var(--text-muted);">${d.mac}</td>
+          <td style="color: var(--cyan);">${d.vendor}</td>
+          <td style="color: #cbd5e1;">${d.hostname}</td>
+          <td><span class="status-badge ${badgeClass}">${d.latency || d.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function rescanWifi() {
+      const tbody = document.getElementById('device-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--cyan);">📡 Ağ taranıyor (254 hedef)... Lütfen bekleyin.</td></tr>';
+      try {
+        const res = await fetch('/api/radar/rescan');
+        const data = await res.json();
+        renderDevices(data.devices || []);
+      } catch (e) {
+        alert("Tarama sırasında hata oluştu!");
+      }
+    }
+
+    // HWID Bilgilerini Getir
+    async function loadHwidData() {
+      try {
+        const res = await fetch('/api/hwid');
+        const data = await res.json();
+        const r = data.real || {};
+        const s = data.spoofed || {};
+
+        document.getElementById('real-board').innerText = r.board_serial || '-';
+        document.getElementById('real-bios').innerText = r.bios_serial || '-';
+        document.getElementById('real-disk').innerText = r.disk_serial || '-';
+        document.getElementById('real-mac').innerText = r.mac_address || '-';
+        document.getElementById('real-uuid').innerText = r.uuid || '-';
+
+        document.getElementById('spoof-board-model').innerText = s.baseboard_product || '-';
+        document.getElementById('spoof-board').innerText = s.baseboard_serial || '-';
+        document.getElementById('spoof-disk').innerText = (s.disk_model || '') + ' (' + (s.disk_serial || '') + ')';
+        document.getElementById('spoof-mac').innerText = s.mac_address || '-';
+        document.getElementById('spoof-uuid').innerText = s.system_uuid || '-';
+      } catch (e) {
+        console.error("HWID hatası:", e);
+      }
+    }
+
+    async function randomizeHwid() {
+      try {
+        const res = await fetch('/api/hwid/randomize');
+        const data = await res.json();
+        loadHwidData();
+      } catch (e) {
+        alert("HWID değiştirilirken hata oluştu!");
+      }
+    }
+
+    // Başlangıçta yükle
+    loadWifiData();
+    loadHwidData();
+  </script>
+</body>
+</html>

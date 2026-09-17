@@ -1,0 +1,12 @@
+# Sovereign OS Kernel Masking Rules (Udev & Sysfs Overlay)
+# Bu kurallar oyunlar veya programlar çalıştığında sahte donanım kimliklerini enjekte eder.
+
+SUBSYSTEM=="dmi", ATTR{product_uuid}="A2DE7608-A000-4264-BC5F-2E826568BC5F"
+SUBSYSTEM=="dmi", ATTR{board_serial}="L1M0B3A85493"
+SUBSYSTEM=="dmi", ATTR{bios_version}="ASUS_7B1457AEF6"
+
+# Disk Seri Numarası Maskesi (libudev / ioctl)
+KERNEL=="nvme*|sd*", ATTR{serial}="23152D3ADD395"
+
+# Ağ Kartı MAC Maskesi
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}="02:60:76:A9:26:37"

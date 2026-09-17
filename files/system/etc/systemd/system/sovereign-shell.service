@@ -1,0 +1,13 @@
+[Unit]
+Description=Sovereign OS Desktop Control Shell
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/sovereign-os/shell
+ExecStart=/usr/bin/python3 /opt/sovereign-os/shell/serve_shell.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

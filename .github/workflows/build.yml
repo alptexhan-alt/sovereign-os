@@ -1,0 +1,32 @@
+name: Build Sovereign OS Image
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  blue-build:
+    name: Build and Publish Sovereign OS
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe:
+          - recipe.yml
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Custom OS Image
+        uses: blue-build/github-action@v1.8
+        with:
+          recipe: ${{ matrix.recipe }}
+          registry_token: ${{ github.token }}
+          pr_event_number: ${{ github.event.number }}
