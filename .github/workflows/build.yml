@@ -28,5 +28,11 @@ jobs:
         uses: blue-build/github-action@v1.8
         with:
           recipe: ${{ matrix.recipe }}
+          cosign_private_key: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgZIGjJIvlzZhK68Od
+            07Fa2xAaLIlL/ItrIcmRfdS5mm2hRANCAAS6unC165B7UwQ3juplIGSzoyrmlW2s
+            6Xb2cTlPHnNxe6ZyLDmZuVIDUjNP+4ZKs/uE07HPW3gjZGI0RCwockSR
+            -----END PRIVATE KEY-----
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
