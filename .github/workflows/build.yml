@@ -24,6 +24,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Generate Cosign Key Pair
+        run: |
+          cosign generate-key-pair
+        env:
+          COSIGN_PASSWORD: ""
+
       - name: Build Custom OS Image
         uses: blue-build/github-action@v1.8
         with:
