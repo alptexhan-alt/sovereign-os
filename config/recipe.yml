@@ -9,11 +9,11 @@ base-image: ghcr.io/ublue-os/bazzite
 image-version: latest
 
 modules:
-  # 1. Dosyaların Sisteme Kopyalanması (/usr ve /etc altına)
+  # 1. Dosyaların Sisteme Kopyalanması (files/system -> /)
   - type: files
     files:
-      - usr: /usr
-      - etc: /etc
+      - source: system
+        destination: /
 
   # 2. Gerekli Çekirdek Paketlerin Eklenmesi
   - type: rpm-ostree
